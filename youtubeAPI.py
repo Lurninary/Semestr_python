@@ -21,10 +21,9 @@ class YoutubeVideo:
     # Метод получения информации о видео по его URL
     def get_info_from_url(self, url):
         try:
-            api_key = 'AIzaSyCXAv-2ZqSYc3BCF0ZL04t3ynrnrECTkQ0'
+            api_key = 'AIzaSyA7Dj7V_p_23QPI-2YunOVqWlgV06OrEek'
             video_id = url.removeprefix("www.youtube.com/watch?v=")
             api_url = f"https://youtube.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,id&id={video_id}&key={api_key}"
-            print(api_url)
             response = requests.get(api_url).json()
             self.title = response['items'][0]['snippet']['title']
             duration_str = response['items'][0]['contentDetails']['duration']
@@ -40,7 +39,7 @@ class YoutubeVideo:
     # Метод получения информации о видео по запросу
     def get_info_from_query(self, query, filter=None):
         self.videos = []
-        api_key = 'AIzaSyCXAv-2ZqSYc3BCF0ZL04t3ynrnrECTkQ0'
+        api_key = 'AIzaSyA7Dj7V_p_23QPI-2YunOVqWlgV06OrEek'
         api_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={query}&type=video&maxResults=10&key={api_key}"
         if (filter):
             api_url += f"&order={filters[filter]}"
@@ -48,7 +47,7 @@ class YoutubeVideo:
         response = requests.get(api_url).json()
         for video in response['items']:
             video_id = video['id']['videoId']
-            self.get_info_from_url(f"https://www.youtube.com/watch?v={video_id}")
+            self.get_info_from_url(f"www.youtube.com/watch?v={video_id}")
             self.videos.append(self.get_info_json())
 
     # Метод парсинга продолжительности видео
