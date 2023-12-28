@@ -40,13 +40,17 @@ class SearchApp(QMainWindow, Ui_MainWindow):
     # Функция поиска видео
     def search(self):
         query = self.searchLine.text()
+        if not query:
+            QMessageBox.critical(self, 'Ошибка', 'Поле поиска не должно быть пустым!')
+            return
         self.listWidget.clear()
-        if "https://www.youtube.com/watch?v=" in query:
+        if "www.youtube.com/watch?v=" in query:
             self.videoAPI = YoutubeVideo(url=query)
             self.add_video_to_list(self.videoAPI.get_info_json())
         else:
             self.videoAPI = YoutubeVideo(query=query, filter=self.sortFilters.currentText())
             for video_info in self.videoAPI.videos:
+                QApplication.processEvents()
                 self.add_video_to_list(video_info)
 
     # Функция добавления видео в список
@@ -71,14 +75,16 @@ class SearchApp(QMainWindow, Ui_MainWindow):
     # Функция сохранения видео
     def on_saveBtn_clicked(self):
         item = self.listWidget.currentItem()
-        if item is not None:
-            index = self.listWidget.indexFromItem(item).row()
-            reply = QMessageBox.question(self, 'Сохранение',
-                                         "Вы уверены, что хотите сохранить?", QMessageBox.Yes |
-                                         QMessageBox.No, QMessageBox.No)
+        if item is None:
+            QMessageBox.critical(self, 'Ошибка', 'Не выбран ни один элемент!')
+            return
+        index = self.listWidget.indexFromItem(item).row()
+        reply = QMessageBox.question(self, 'Сохранение',
+                                     "Вы уверены, что хотите сохранить?", QMessageBox.Yes |
+                                     QMessageBox.No, QMessageBox.No)
 
-            if reply == QMessageBox.Yes:
-                self.db_handler.insert_record(self.videoAPI.videos[index])
+        if reply == QMessageBox.Yes:
+            self.db_handler.insert_record(self.videoAPI.videos[index])
 
     # Функция открытия окна базы данных
     def open_db_window(self):

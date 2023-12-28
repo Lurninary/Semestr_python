@@ -20,18 +20,22 @@ class YoutubeVideo:
 
     # Метод получения информации о видео по его URL
     def get_info_from_url(self, url):
-        api_key = 'AIzaSyCXAv-2ZqSYc3BCF0ZL04t3ynrnrECTkQ0'
-        video_id = url.removeprefix("https://www.youtube.com/watch?v=")
-        api_url = f"https://youtube.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,id&id={video_id}&key={api_key}"
-
-        response = requests.get(api_url).json()
-        self.title = response['items'][0]['snippet']['title']
-        duration_str = response['items'][0]['contentDetails']['duration']
-        self.duration = self.parse_duration(duration_str)
-        self.views = response['items'][0]['statistics']['viewCount']
-        self.published = response['items'][0]['snippet']['publishedAt']
-        self.thumbnail_url = response['items'][0]['snippet']['thumbnails']['medium']['url']
-        self.url = url
+        try:
+            api_key = 'AIzaSyCXAv-2ZqSYc3BCF0ZL04t3ynrnrECTkQ0'
+            video_id = url.removeprefix("www.youtube.com/watch?v=")
+            api_url = f"https://youtube.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,id&id={video_id}&key={api_key}"
+            print(api_url)
+            response = requests.get(api_url).json()
+            self.title = response['items'][0]['snippet']['title']
+            duration_str = response['items'][0]['contentDetails']['duration']
+            self.duration = self.parse_duration(duration_str)
+            self.views = response['items'][0]['statistics']['viewCount']
+            self.published = response['items'][0]['snippet']['publishedAt']
+            self.thumbnail_url = response['items'][0]['snippet']['thumbnails']['medium']['url']
+            self.url = url
+        except Exception as e:
+            print(f"Error fetching video info: {e}")
+            raise
 
     # Метод получения информации о видео по запросу
     def get_info_from_query(self, query, filter=None):

@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QMessageBox
 from Resources.database import Ui_MainWindow
+from youtubeAPI import YoutubeVideo
 
 
 # Создание пользовательского виджета, который будет использоваться для отображения таблицы базы данных
@@ -8,6 +9,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.db_handler = db_handler
+        self.dbTable.setAcceptDrops(True)
 
         self.dbSaveBtn.clicked.connect(self.save_to_db)
         self.dbDeleteBtn.clicked.connect(self.delete_from_db)
@@ -43,7 +45,29 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     # Функция удаления данных из таблицы и базы данных
     def delete_from_db(self):
         indexes = self.dbTable.selectedItems()
+        if not indexes:
+            QMessageBox.critical(self, 'Ошибка', 'Не выбран ни один элемент!')
+            return
         for index in sorted(indexes, reverse=True):
             item_id = int(self.dbTable.item(index.row(), 0).text())
             self.db_handler.delete_item(item_id)
             self.dbTable.removeRow(index.row())
+
+    def dragEnterEvent(self, e):
+        if e.mimeData().hasUrls():
+            e.accept()
+
+    def dragMoveEvent(self, e):
+        if e.mimeData().hasUrls():
+            e.accept()
+
+    def dropEvent(self, e):
+        if e.mimeData().hasUrls():
+            for url in e.mimeData().urls():
+                self.load_video_from_url(url.toString())
+                self.db_handler.insert_record(self.videoAPI.get_info_json())
+            e.accept()
+
+    def load_video_from_url(self, url):
+        videoAPI = YoutubeVideo(url=url)
+        self.add_video_to_list(videoAPI.get_info_json())
